@@ -29,6 +29,14 @@ export interface HorizonBalanceLike {
   balance: string;
 }
 
+/** Stellar uses alphanum4 for codes up to 4 chars and alphanum12 thereafter. */
+export function stellarAssetTypeForCode(code: string): 'credit_alphanum4' | 'credit_alphanum12' {
+  if (!/^[A-Za-z0-9]{1,12}$/.test(code)) {
+    throw new Error('Stellar asset codes must contain 1 to 12 alphanumeric characters.');
+  }
+  return code.length <= 4 ? 'credit_alphanum4' : 'credit_alphanum12';
+}
+
 /** Verified asset metadata structure. */
 export interface RegisteredAsset {
   code: string;
@@ -45,6 +53,7 @@ export interface RegisteredAsset {
    * asset in a screen.
    */
   obligor?: string;
+  kind: 'treasury' | 'fund' | 'equity' | 'governance' | 'stablecoin' | 'native';
   reserveXlm?: number;
   sacContractId?: string;
 }
@@ -94,6 +103,7 @@ export const ASSET_REGISTRY: Record<string, RegisteredAsset> = {
     kind: 'stablecoin',
     reserveXlm: 0.5,
   },
+  // AQUA floats and is priced from the order book, never from a hardcoded rate.
   AQUA: {
     code: 'AQUA',
     issuer: AQUA_MAINNET_ISSUER,
@@ -101,7 +111,7 @@ export const ASSET_REGISTRY: Record<string, RegisteredAsset> = {
     issuerName: 'Aquarius',
     homeDomain: 'aqua.network',
     network: 'mainnet',
-    kind: 'equity',
+    kind: 'governance',
     reserveXlm: 0.5,
   },
   USDY: {
@@ -136,6 +146,10 @@ export const ASSET_REGISTRY: Record<string, RegisteredAsset> = {
     code: 'CETES',
     issuer: ETHERFUSE_MAINNET_ISSUER,
     name: 'Etherfuse CETES',
+  CETES: {
+    code: 'CETES',
+    issuer: ETHERFUSE_MAINNET_ISSUER,
+    name: 'Mexican Treasury Certificates',
     issuerName: 'Etherfuse',
     homeDomain: 'etherfuse.com',
     network: 'mainnet',
@@ -147,6 +161,7 @@ export const ASSET_REGISTRY: Record<string, RegisteredAsset> = {
     code: 'USTRY',
     issuer: ETHERFUSE_MAINNET_ISSUER,
     name: 'Etherfuse USTRY',
+    name: 'US Treasury Notes',
     issuerName: 'Etherfuse',
     homeDomain: 'etherfuse.com',
     network: 'mainnet',
@@ -158,6 +173,7 @@ export const ASSET_REGISTRY: Record<string, RegisteredAsset> = {
     code: 'TESOURO',
     issuer: ETHERFUSE_MAINNET_ISSUER,
     name: 'Etherfuse TESOURO',
+    name: 'Brazilian Treasury',
     issuerName: 'Etherfuse',
     homeDomain: 'etherfuse.com',
     network: 'mainnet',
